@@ -1,0 +1,9 @@
+name: Hello World
+description: Hello World Module
+type: module
+core_version_requirement: ^9
+package: Custom
+dependencies:
+  - drupal:system (>= 9.1)
+  - module_filter
+configure: hello_world.settings
