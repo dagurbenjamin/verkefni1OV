@@ -1,0 +1,24 @@
+music_search.hello:
+  path: '/connected'
+  defaults:
+    _controller: Drupal\music_search\Controller\MusicSearchController::getConnection
+    _title: 'Music Search Controller'
+  requirements:
+    _permission: 'access content'
+
+music_search.bar:
+  path: '/music_search_bar'
+  defaults:
+    _form: Drupal\music_search\Form\MainSearchBarForm
+    _title: 'Search Bar for music'
+  requirements:
+    _permission: 'administer site configuration'
+
+
+music_search.limiter:
+  path: '/music_search/limiter'
+  defaults:
+    _form: Drupal\music_search\Form\SpotifyDiscogsForm
+    _title: 'Search bar limiter for music'
+  requirements:
+    _permission: 'administer site configuration'

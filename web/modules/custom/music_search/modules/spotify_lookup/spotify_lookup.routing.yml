@@ -1,0 +1,7 @@
+spotify_lookup_api_insert:
+  path: '/admin/config/spotify-api-configuration'
+  defaults:
+    _form: Drupal\spotify_lookup\Form\SpotifyApiConfigForm
+    _title: 'Spotify API configuration'
+  requirements:
+    _permission: 'administer site configuration'

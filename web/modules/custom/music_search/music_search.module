@@ -1,0 +1,18 @@
+<?php
+
+
+/**
+ * Implements hook_help().
+ */
+
+function music_search_help($route_name, \Drupal\Core\Routing\RouteMatchInterface  $route_match) {
+  switch($route_name) {
+    case 'help.page.music_search':
+      $output = '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('This is a music search module that will be able to search music, artists and albums') . '</p>';
+
+      return $output;
+
+    default:
+  }
+}

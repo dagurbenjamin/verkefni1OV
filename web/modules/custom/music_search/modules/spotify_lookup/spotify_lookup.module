@@ -1,0 +1,18 @@
+<?php
+
+
+/**
+ * Implements hook_help().
+ */
+
+function spotify_api_initiation($route_name, \Drupal\Core\Routing\RouteMatchInterface  $route_match) {
+  switch($route_name) {
+    case 'help.page.spotify_api':
+      $output = '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Will spotify search work') . '</p>';
+
+      return $output;
+
+    default:
+  }
+}

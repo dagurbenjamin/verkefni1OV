@@ -1,0 +1,9 @@
+name: Music Search
+description: Music Search Module
+type: module
+core_version_requirement: ^9
+package: Custom
+dependencies:
+  - drupal:system (>= 9.1)
+  - module_filter
+configure: music_search.settings

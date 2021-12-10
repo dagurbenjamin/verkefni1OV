@@ -1,0 +1,10 @@
+name: Spotify Lookup
+description: Spotify Lookup Module
+type: module
+core_version_requirement: ^9
+package: Custom
+dependencies:
+  - drupal:system (>= 9.1)
+  - module_filter
+  - music_search
+configure: spotify.settings
