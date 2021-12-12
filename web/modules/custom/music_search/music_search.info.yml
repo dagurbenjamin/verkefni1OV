@@ -7,3 +7,5 @@ dependencies:
   - drupal:system (>= 9.1)
   - module_filter
 configure: music_search.settings
+
+

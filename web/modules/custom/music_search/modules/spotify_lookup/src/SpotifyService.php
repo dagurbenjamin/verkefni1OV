@@ -18,18 +18,33 @@ class SpotifyService
     $this->configFactory = $config_factory;
   }
 
-  public function search_album(string $album_name) : array {
-    $uri = '	https://api.spotify.com//v1/search?type=album&include_external=audio/' . $album_name;
+  /**
+   * @param string $album_name
+   * @return array
+   */
+
+  public function search_album(string $album_name) : \stdClass {
+    $uri = 'https://api.spotify.com/v1/search?type=album&include_external=audio&limit=5&q=' . $album_name;
     return $this -> _spotify_api_get_query($uri);
   }
 
-  public function search_track(string $track_name) : array {
-    $uri = '	https://api.spotify.com//v1/search?type=track&include_external=audio/' . $track_name;
+  /**
+   * @param string $track_name
+   * @return array
+   */
+
+  public function search_track(string $track_name) : \stdClass {
+    $uri = 'https://api.spotify.com/v1/search?type=track&include_external=audio&limit=5&q=' . $track_name;
     return $this -> _spotify_api_get_query($uri);
   }
 
-  public function search_artist(string $artist_name) : array {
-    $uri = '	https://api.spotify.com//v1/search?type=artist&include_external=audio/' . $artist_name;
+  /**
+   * @param string $artist_name
+   * @return array
+   */
+
+  public function search_artist(string $artist_name) : \stdClass {
+    $uri = 'https://api.spotify.com/v1/search?type=artist&include_external=audio&limit=5&q=' . $artist_name;
     return $this -> _spotify_api_get_query($uri);
   }
 
@@ -40,6 +55,7 @@ class SpotifyService
    *   The fully generated search string
    * @return object
    *   Returns a stdClass with the search results or an error message
+   * @throws \GuzzleHttp\Exception\GuzzleException
    */
   private function _spotify_api_get_query($uri) {
     $token = $this->_spotify_api_get_auth_token();
@@ -56,12 +72,12 @@ class SpotifyService
     $search_results = \Drupal::httpClient()->request('GET', $uri, $options);
 
     if (empty($search_results->error)) {
-      $search_results = drupal_json_decode($search_results->data);
+      $search_results = json_decode($search_results->getBody());
 
     } else {
-      drupal_set_message(t('The search request resulted in the following error: @error.', array(
+      $this->t('The search request resulted in the following error: @error.', array(
         '@error' => $search_results->error,
-      )));
+      ));
 
       return $search_results->error;
     }
@@ -73,7 +89,7 @@ class SpotifyService
    */
   private function _spotify_api_get_auth_token(): bool|string {
     $connection_string = "https://accounts.spotify.com/api/token";
-    $config = $this->configFactory->get('spotify_lookup.spotify_service');
+    $config = $this->configFactory->get('spotify_lookup.api_keys');
     $api_auth = $config->get('api_auth');
     $api_secret = $config->get('api_secret');
     $key = base64_encode($api_auth . ':' . $api_secret);

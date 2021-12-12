@@ -7,7 +7,7 @@ music_search.hello:
     _permission: 'access content'
 
 music_search.bar:
-  path: '/music_search_bar'
+  path: '/music_search'
   defaults:
     _form: Drupal\music_search\Form\MainSearchBarForm
     _title: 'Search Bar for music'
@@ -20,5 +20,14 @@ music_search.limiter:
   defaults:
     _form: Drupal\music_search\Form\SpotifyDiscogsForm
     _title: 'Search bar limiter for music'
+  requirements:
+    _permission: 'administer site configuration'
+
+
+music_search.confirmation:
+  path: '/music_search/limiter/confirm'
+  defaults:
+    _form: Drupal\music_search\Form\ConfirmationForm
+    _title: 'Search confirmation'
   requirements:
     _permission: 'administer site configuration'

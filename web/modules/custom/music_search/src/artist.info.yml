@@ -1,0 +1,5 @@
+name: Artist
+description: A module that creates artist node
+type: module
+core_version_requirement: ^9
+package: Custom
