@@ -5,6 +5,7 @@ namespace Drupal\music_search\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element\FormElement;
+use Drupal\node\NodeInterface;
 use Drupal\spotify_lookup\SpotifyService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -103,10 +104,10 @@ class ConfirmationForm extends FormBase {
           '#type' => 'checkboxes',
           '#title' => t('What about your selected artist would you like to save?'),
           '#options' => array(
-            1 => 'Nafn listamanns: ' . $the_artist->name,
-            2 => 'Spotify linkur á profile listamanns: ' . $the_artist->external_urls->spotify,
+            'Nafn' => 'Nafn listamanns: ' . $the_artist->name,
+            'Linkur' => 'Spotify linkur á profile listamanns: ' . $the_artist->external_urls->spotify,
           ),
-          '#default_value' => array(0, 1,),
+          '#default_value' => array(1, 2,),
         ];
         $form['photo'] = [
           '#theme' => 'image',
@@ -168,15 +169,30 @@ class ConfirmationForm extends FormBase {
       $temp_store_box = [];
       $temp_store_box[0] = $the_artist_pic;
 
-      foreach ($checked_boxes as $item) {
-        if ($item == 1) {
-          $temp_store_box[1] = $artist_pic_name;
-        }
-        if ($item == 2) {
-          $temp_store_box[2] = $the_desired_artist->artists->items[$chosen_entity]->external_urls->spotify;
-        }
-      }
 
+
+      $info = [
+        'type' => 'listamadur',
+        'title' => $artist_pic_name
+      ];
+
+      /**
+       * @var NodeInterface $node
+       */
+
+      $node = \Drupal::entityTypeManager()->getStorage('node')->create($info);
+      foreach ($checked_boxes as $item) {
+        if ($item == 'Nafn') {
+          $node->set('field_nafn', $artist_pic_name);
+        }
+        if ($item == 'Linkur')
+          $node->set('field_vefsida', $the_desired_artist->artists->items[$chosen_entity]->external_urls->spotify);
+
+      }
+      $node->set('field_listamannamynd', $myndir);
+      $node->save();
+      $nid = $node->id();
+      $form_state->setRedirect('entity.node.canonical', ['node' => $nid]);
     }
   }
   /**
@@ -276,7 +292,7 @@ class ConfirmationForm extends FormBase {
       'title' => $object_to_save["name"]
 
     ];
-    /** @var \Drupal\node\NodeInterface $node */
+    /** @var NodeInterface $node */
     $node = \Drupal::entityTypeManager()->getStorage('node')->create($values);
     $node->set('field_hlekkur', $object_to_save["link"]);
     if ($object_to_save['type'] == "artist") {
