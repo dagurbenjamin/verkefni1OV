@@ -47,13 +47,13 @@ class ConfirmationForm extends FormBase {
         '#type' => 'checkboxes',
         '#title' => t('What about your selected album would you like to save?'),
         '#options' => array(
-          1 => 'Lagið: ' . $the_track->name,
-          2 => 'Nafn listamanns: ' . $the_track->artists[0]->name,
-          3 => 'Album sem lagið er á: ' . $the_track->album->name,
-          4 => 'Útgáfudagur: ' . $the_track->album->release_date,
-          5 => 'Spotify linkur á lagið: ' . $the_track->external_urls->spotify,
+          'Lag' => 'Lagið: ' . $the_track->name,
+          'Nafn' => 'Nafn listamanns: ' . $the_track->artists[0]->name,
+          'Album' => 'Album sem lagið er á: ' . $the_track->album->name,
+          'Dagur' => 'Útgáfudagur: ' . $the_track->album->release_date,
+          'Linkur' => 'Spotify linkur á lagið: ' . $the_track->external_urls->spotify,
         ),
-        '#default_value' => array(0, 1, 2, 3, 4),
+        '#default_value' => array('Lag', 'Nafn', 'Album', 'Dagur', 'Linkur'),
       ];
       $form['photo'] = [
         '#theme' => 'image',
@@ -76,12 +76,12 @@ class ConfirmationForm extends FormBase {
           '#type' => 'checkboxes',
           '#title' => t('What about your selected album would you like to save?'),
           '#options' => array(
-            1 => 'Nafn albums: ' . $the_album->name,
-            2 => 'Nafn listamanns: ' . $the_album->artists[0]->name,
-            3 => 'Útgáfudagur: ' . $the_album->release_date,
-            4 => 'Spotify linkur á albumið: ' . $the_album->external_urls->spotify,
+            'Album' => 'Nafn albums: ' . $the_album->name,
+            'Nafn' => 'Nafn listamanns: ' . $the_album->artists[0]->name,
+            'Dagur' => 'Útgáfudagur: ' . $the_album->release_date,
+            'Linkur' => 'Spotify linkur á albumið: ' . $the_album->external_urls->spotify,
           ),
-          '#default_value' => array(0, 1, 2, 3, 4),
+          '#default_value' => array('Album', 'Nafn', 'Dagur', 'Linkur'),
         ];
         $form['photo'] = [
           '#theme' => 'image',
@@ -107,7 +107,7 @@ class ConfirmationForm extends FormBase {
             'Nafn' => 'Nafn listamanns: ' . $the_artist->name,
             'Linkur' => 'Spotify linkur á profile listamanns: ' . $the_artist->external_urls->spotify,
           ),
-          '#default_value' => array(1, 2,),
+          '#default_value' => array('Nafn', 'Linkur'),
         ];
         $form['photo'] = [
           '#theme' => 'image',
@@ -143,9 +143,10 @@ class ConfirmationForm extends FormBase {
 
     $the_album_pic = $the_desired_album->albums->items[$chosen_entity]->images[0]->url;
     $album_pic_name = $the_desired_album->albums->items[$chosen_entity]->name;
-
-    $the_artist_pic = $the_desired_artist->artists->items[$chosen_entity]->images[0]->url;
-    $artist_pic_name = $the_desired_artist->artists->items[$chosen_entity]->name;
+    
+    if ($number == 2)
+      $the_artist_pic = $the_desired_artist->artists->items[$chosen_entity]->images[0]->url;
+      $artist_pic_name = $the_desired_artist->artists->items[$chosen_entity]->name;
 
     $folder = 'Verkefni1AllarMyndir';
 
@@ -155,20 +156,88 @@ class ConfirmationForm extends FormBase {
 
     if ($number == 0 && $the_track_pic !== null) {
       $myndir[] = $this->_save_file($the_track_pic, 'Verkefni1AllarMyndir', 'image', $track_pic_name, $track_pic_name . '.jpg' );
-      \Drupal::state()->setMultiple(['the_chosen' => $form_state->getValue('Options')]);
+      \Drupal::state()->setMultiple(['checked_boxes' => $form_state->getValue('options')]);
+      $checked_boxes = \Drupal::state()->get('checked_boxes');
+      $temp_store_box = [];
+      $temp_store_box[0] = $the_track_pic;
+
+      $info = [
+        'type' => 'lag',
+        'title' => $track_pic_name
+      ];
+
+      /**
+       * @var NodeInterface $node
+       */
+
+      $node = \Drupal::entityTypeManager()->getStorage('node')->create($info);
+      foreach ($checked_boxes as $item) {
+        if ($item == 'Lag')
+          $node->set('field_nafn_lags', $track_pic_name);
+
+        if ($item == 'Nafn')
+          $node->set('field_nafn', $the_desired_track->tracks->items[$chosen_entity]->artists[0]->name);
+
+        if ($item == 'Album')
+          $node->set('field_album', $the_desired_track->tracks->items[$chosen_entity]->album->name);
+
+        if ($item == 'Dagur')
+          $node->set('field_album', $the_desired_track->tracks->items[$chosen_entity]->album->release_date);
+
+        if ($item == 'Linkur')
+          $node->set('field_album', $the_desired_track->tracks->items[$chosen_entity]->external_urls->spotify);
+
+      }
+      $node->save();
+      $nid = $node->id();
+      $form_state->setRedirect('entity.node.canonical', ['node' => $nid]);
 
     }
     elseif ($number == 1 && $the_album_pic !== null) {
       $myndir[] = $this->_save_file($the_album_pic, 'Verkefni1AllarMyndir', 'image', $album_pic_name, $album_pic_name . '.jpg' );
+      \Drupal::state()->setMultiple(['checked_boxes' => $form_state->getValue('options')]);
+      $checked_boxes = \Drupal::state()->get('checked_boxes');
+      $temp_store_box = [];
+      $temp_store_box[0] = $album_pic_name;
+
+      $info = [
+        'type' => 'plata',
+        'title' => $album_pic_name
+      ];
+
+      /**
+       * @var NodeInterface $node
+       */
+
+      $node = \Drupal::entityTypeManager()->getStorage('node')->create($info);
+      foreach ($checked_boxes as $item) {
+        if ($item == 'Album')
+          $node->set('field_album', $album_pic_name);
+
+        if ($item == 'Nafn')
+          $node->set('field_tonlistarmadur', $the_desired_album->albums->items[$chosen_entity]->artists[0]->name);
+
+        if ($item == 'Dagur')
+          $node->set('field_utgafuar', $the_desired_album->albums->items[$chosen_entity]->release_date);
+
+        if ($item == 'Linkur')
+          $node->set('field_link_a_plotu', $the_desired_album->albums->items[$chosen_entity]->external_urls->spotify);
+
+
+      }
+      $node->set('field_mynd', $myndir);
+      $node->save();
+      $nid = $node->id();
+      $form_state->setRedirect('entity.node.canonical', ['node' => $nid]);
+
     }
     elseif ($number == 2 && $the_artist_pic !== null) {
       $myndir[] = $this->_save_file($the_artist_pic, 'Verkefni1AllarMyndir', 'image', $artist_pic_name, $artist_pic_name . '.jpg' );
 
-      \Drupal::state()->setMultiple(['checked_boxes' => $form_state->getValue('Options')]);
+      \Drupal::state()->setMultiple(['checked_boxes' => $form_state->getValue('options')]);
       $checked_boxes = \Drupal::state()->get('checked_boxes');
       $temp_store_box = [];
       $temp_store_box[0] = $the_artist_pic;
-
 
 
       $info = [
@@ -248,63 +317,5 @@ class ConfirmationForm extends FormBase {
     $media_object->save();
 
     return $media_object->id();
-  }
-  private function _artistNode(array &$form, FormStateInterface $form_state)
-  {
-    $factory = \Drupal::service('tempstore.private');
-    $store = $factory->get('my_module.my_collection');
-    $results = $store->get('my_key');
-
-    $object_to_save = [];
-
-    foreach ($results as $item) {
-
-      $object_to_save['type'] = $item['type'];
-
-      $value = $form_state->getValue($item["id"]);
-      if (!is_null($value) and $value['name'] !== 0) {
-        // name selected from $item.
-        $object_to_save['name'] = $item['name'];
-      }
-
-      if (!is_null($value) and $value['link'] !== 0) {
-        // link selected from $item.
-        $object_to_save['link'] = $item['url'];
-      }
-      if (!is_null($value) and $item['type'] == 'artist' and $value['popularity'] !== 0) {
-        // popularity selected from $item.
-        $object_to_save['popularity'] = $item['popularity'];
-      } elseif (!is_null($value) and $item['type'] !== 'artist' and $value['artist'] !== 0) {
-        // artist selected from $item.
-        $object_to_save['artist'] = $item['artist'];
-      }
-    }
-    $content_type = "";
-    if ($object_to_save["type"] == "artist") {
-      $content_type = "listamadur";
-    } elseif ($object_to_save["type"] == "track") {
-      $content_type = "lag";
-    } elseif ($object_to_save["type"] == "album") {
-      $content_type = "plata";
-    }
-    $values = [
-      'type' => $content_type,
-      'title' => $object_to_save["name"]
-
-    ];
-    /** @var NodeInterface $node */
-    $node = \Drupal::entityTypeManager()->getStorage('node')->create($values);
-    $node->set('field_hlekkur', $object_to_save["link"]);
-    if ($object_to_save['type'] == "artist") {
-      $node->set('field_popularity', $object_to_save["popularity"]);
-    } else {
-      $node->set('field_artist', $object_to_save["artist"]);
-    }
-
-    $node->save();
-    $nid = $node->id();
-    $form_state->setRedirect('entity.node.canonical', ['node' => $nid]);
-
-
   }
 }
